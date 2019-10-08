@@ -26,10 +26,16 @@ puts "File created, and is #{filesize} MB"
 redis = Redis::PooledClient.new
 
 puts "Writing to Redis"
-10000.times do |i|
-  puts "iteration #{i}"
-  File.each_line filepath do |line|
-    key, value = line.split(",")
-    redis.set(key, value)
+begin
+  10000.times do |i|
+    puts "iteration #{i}"
+    File.each_line filepath do |line|
+      key, value = line.split(",")
+      redis.set(key, value)
+    end
   end
+rescue ex
+  puts ex
+  File.delete(filepath)
+  exit 1
 end
