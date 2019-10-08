@@ -2,17 +2,22 @@ require "redis"
 
 r = Random.new
 
-filepath = "rand-" + r.hex(4).to_s
+filepath = "rand-#{r.hex(4).to_s}"
+
+def cleanup(filepath)
+  File.delete(filepath) if File.exists?(filepath)
+end
 
 Signal::INT.trap do
-  File.delete(filepath)
+  puts "shutting down"
+  cleanup(filepath)
 end
 
 Signal::STOP.trap do
-  File.delete(filepath)
+  cleanup(filepath)
 end
 
-puts "Generating file: " + filepath
+puts "Preparing KV data file: " + filepath
 file = File.open(filepath, "w") do |io|
   200000.times do
     data = r.hex(8).to_s + "," + r.base64(512).to_s
@@ -27,7 +32,7 @@ redis = Redis::PooledClient.new
 
 puts "Writing to Redis"
 begin
-  10000.times do |i|
+  200000.times do |i|
     puts "iteration #{i}"
     File.each_line filepath do |line|
       key, value = line.split(",")
@@ -35,7 +40,7 @@ begin
     end
   end
 rescue ex
-  puts ex
-  File.delete(filepath)
+  STDERR.puts ex
+  cleanup(filepath)
   exit 1
 end
