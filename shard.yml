@@ -1,0 +1,19 @@
+name: redis-test
+version: 0.1.0
+
+authors:
+  - Anastas Dancha <anapsix@random.io>
+
+description: |
+  Tests local Redis instance by writing data to it
+
+dependencies:
+  redis:
+    github: stefanwille/crystal-redis
+    version: ~> 2.3.0
+
+targets:
+  redis-test:
+    main: src/redis-test.cr
+
+license: MIT
